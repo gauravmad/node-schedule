@@ -1,6 +1,7 @@
 const express = require("express");
 const schedule = require("node-schedule");
 const axios = require("axios");
+const cron = require("node-cron");
 const mongoose = require("mongoose");
 
 require("dotenv").config();
@@ -85,17 +86,22 @@ const sendWhatsAppMessage = async (phone = "+919689675896") => {
   }
 };
 
-schedule.scheduleJob("30 5 * * *", async () => {
-  console.log("🔔 Running scheduled job at 11:00 AM IST (5:30 AM UTC)...");
-  const result = await sendWhatsAppMessage();
-  console.log(
-    result.success
-      ? "✅ Scheduled message sent"
-      : "❌ Scheduled message failed",
-    result
-  );
-});
-
+cron.schedule(
+  "10 11 * * *", // This is 11:10 AM IST
+  async () => {
+    console.log("🔔 Running scheduled job at 10:58 AM IST...");
+    const result = await sendWhatsAppMessage();
+    console.log(
+      result.success
+        ? "✅ Scheduled message sent"
+        : "❌ Scheduled message failed",
+      result
+    );
+  },
+  {
+    timezone: "Asia/Kolkata",
+  }
+);
 app.post("/send-message", async (req, res) => {
   console.log("PORT:", process.env.PORT);
   console.log("MONGO_URI:", process.env.MONGO_URI);
