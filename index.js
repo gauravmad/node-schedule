@@ -85,8 +85,8 @@ const sendWhatsAppMessage = async (phone = "+919689675896") => {
   }
 };
 
-schedule.scheduleJob("35 11 * * *", async () => {
-  console.log("🔔 Running scheduled job at 5:05 PM IST (11:35 AM UTC)...");
+schedule.scheduleJob("30 5 * * *", async () => {
+  console.log("🔔 Running scheduled job at 11:00 AM IST (5:30 AM UTC)...");
   const result = await sendWhatsAppMessage();
   console.log(
     result.success
