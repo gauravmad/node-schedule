@@ -71,7 +71,7 @@ const sendWhatsAppMessage = async (phone = "+918668264139") => {
 
     const newMessage = new SentMessage({
       phone,
-      template_name: "_7dayfree_thank_msg",
+      template_name: "7dayfree",
       message_status: messageRes.data,
     });
 
@@ -121,7 +121,7 @@ const sendSmsMessage = async()=>{
 
 
 cron.schedule(
-  "5 17 * * *",
+  "59 16 * * *",
   async () => {
     console.log("🔔 Running scheduled job at 5:05 PM IST...");
     const result = await sendWhatsAppMessage();
