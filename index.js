@@ -121,7 +121,7 @@ const sendSmsMessage = async()=>{
 
 
 cron.schedule(
-  "59 16 * * *",
+  "07 17 * * *",
   async () => {
     console.log("🔔 Running scheduled job at 5:05 PM IST...");
     const result = await sendWhatsAppMessage();
