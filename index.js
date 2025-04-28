@@ -1,5 +1,4 @@
 const express = require("express");
-const schedule = require("node-schedule");
 const axios = require("axios");
 const cron = require("node-cron");
 const mongoose = require("mongoose");
@@ -28,8 +27,9 @@ const messageSchema = new mongoose.Schema({
 });
 
 const SentMessage = mongoose.model("sms-notification-sent", messageSchema);
+const SmsMessage = mongoose.model("sms-text-notification", messageSchema);
 
-const sendWhatsAppMessage = async (phone = "+919689675896") => {
+const sendWhatsAppMessage = async (phone = "+918668264139") => {
   try {
     const loginRes = await axios.post(
       "https://apis.rmlconnect.net/auth/v1/login/",
@@ -51,7 +51,7 @@ const sendWhatsAppMessage = async (phone = "+919689675896") => {
         phone,
         media: {
           type: "media_template",
-          template_name: "annual_plan1",
+          template_name: "_7dayfree_thank_msg",
           lang_code: "en",
           body: [
             { text: "Gaurav Test" },
@@ -71,7 +71,7 @@ const sendWhatsAppMessage = async (phone = "+919689675896") => {
 
     const newMessage = new SentMessage({
       phone,
-      template_name: "annual_plan1",
+      template_name: "_7dayfree_thank_msg",
       message_status: messageRes.data,
     });
 
@@ -86,25 +86,67 @@ const sendWhatsAppMessage = async (phone = "+919689675896") => {
   }
 };
 
+const sendSmsMessage = async()=>{
+  try {
+    const smsRes = await axios.get(
+      "https://api.smartping.ai/fe/api/v1/send",
+      {
+        params:{
+          username:"strbotmpg.trans",
+          password: "B5daU",
+          unicode: true,
+          from: "dorTV",
+          to: "9689675896",
+          dltPrincipalEntityId: "1701171991904309835",
+          dltContentId: "1707174402366007486",
+          text: "Dear Customer, This is regarding your installation request via call. Please fill the form using the link below. Our technician will contact you within 24–48 hours after submission to schedule your TV installation. Gaurav – Team Dor"
+        }
+      }
+    );
+
+    const newSmsMessage = new SmsMessage({
+      phone: "9689675896",
+      template_name: "SMS Template",
+      message_status: smsRes.data,
+    });
+
+    await newSmsMessage.save();
+    console.log("📤 SMS sent successfully:", smsRes.data);
+    return { success: true, data: smsRes.data };
+  } catch (error) {
+    console.error("❌ Failed to send SMS:", error.response?.data || error.message);
+    return { success: false, error: error.response?.data || error.message };
+  }
+};
+
+
 cron.schedule(
-  "10 11 * * *", // This is 11:10 AM IST
+  "55 16 * * *",
   async () => {
-    console.log("🔔 Running scheduled job at 10:58 AM IST...");
+    console.log("🔔 Running scheduled job at 5:05 PM IST...");
     const result = await sendWhatsAppMessage();
+    const resultSms = await sendSmsMessage();
     console.log(
       result.success
-        ? "✅ Scheduled message sent"
+        ? "✅ Scheduled Whatsapp message sent"
         : "❌ Scheduled message failed",
       result
+    );
+    console.log(
+      resultSms.success
+        ? "✅ Scheduled SMS Text sent"
+        : "❌ Scheduled SMS failed",
+      resultSms
     );
   },
   {
     timezone: "Asia/Kolkata",
   }
 );
+
 app.post("/send-message", async (req, res) => {
-  console.log("PORT:", process.env.PORT);
-  console.log("MONGO_URI:", process.env.MONGO_URI);
+  // console.log("PORT:", process.env.PORT);
+  // console.log("MONGO_URI:", process.env.MONGO_URI);
 
   const { phone } = req.body;
   console.log("Received request to send message:", phone);
@@ -124,6 +166,17 @@ app.post("/send-message", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to send message", details: result.error });
+  }
+});
+
+app.get("/send-sms", async (req, res) => {
+  const result = await sendSmsMessage();
+  console.log("SMS send result:", result);
+
+  if (result.success) {
+    res.status(200).json({ message: "SMS sent and saved", data: result.data });
+  } else {
+    res.status(500).json({ error: "Failed to send SMS", details: result.error });
   }
 });
 
